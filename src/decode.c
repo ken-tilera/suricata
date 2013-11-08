@@ -60,6 +60,7 @@
 #include "tmqh-packetpool.h"
 #include "util-profiling.h"
 #include "pkt-var.h"
+#include "host.h"
 
 void DecodeTunnel(ThreadVars *tv, DecodeThreadVars *dtv, Packet *p,
         uint8_t *pkt, uint16_t len, PacketQueue *pq, uint8_t proto)
@@ -88,7 +89,7 @@ void DecodeTunnel(ThreadVars *tv, DecodeThreadVars *dtv, Packet *p,
  */
 void PacketFree(Packet *p)
 {
-    PACKET_CLEANUP(p);
+    PacketCleanup(p);
     SCFree(p);
 }
 
@@ -150,6 +151,65 @@ Packet *PacketGetFromQueueOrAlloc(void)
     }
 
     return p;
+}
+
+/**
+ *  \brief Initialize a packet structure for use.
+ */
+void PacketInitialize(Packet *p) 
+{
+#if defined(__tile__)
+    const unsigned int size = sizeof(Packet);
+#else
+    const int size = SIZE_OF_PACKET;
+#endif
+
+    // Clear the entire Packet structure. This is faster than
+    // setting each field.
+    memset(p, 0x00, size);
+
+#if defined(__SC_CUDA_SUPPORT__)
+    SCMutexInit(&(p)->cuda_pkt_vars.cuda_mutex, NULL);
+    SCCondInit(&(p)->cuda_pkt_vars.cuda_cond, NULL);
+#endif
+    SCMutexInit(&(p)->tunnel_mutex, NULL);
+    PACKET_RESET_CHECKSUMS((p));
+    (p)->pkt = ((uint8_t *)(p)) + sizeof(Packet);
+}
+
+/**
+ *  \brief Cleanup a packet so that we can free it. No memset needed..
+ */
+void PacketCleanup(Packet *p)
+{
+    FlowDeReference(&((p)->flow));
+    if ((p)->pktvar != NULL) {
+      PktVarFree((p)->pktvar);
+    }
+    SCMutexDestroy(&(p)->tunnel_mutex);
+    HostDeReference(&((p)->host_src));
+    HostDeReference(&((p)->host_dst));
+    AppLayerDecoderEventsResetEvents((p)->app_layer_events);
+#ifdef __SC_CUDA_SUPPORT__
+    SCMutexDestroy(&(p)->cuda_mutex);
+    SCCondDestroy(&(p)->cuda_cond);
+#endif
+}
+
+/**
+ *  \brief Recycle a packet structure for reuse.
+ *  
+ *  Preserve the PKT_ALLOC flag and ReleasePacket function Pointer.
+ */
+void PacketRecycle(Packet *p)
+{
+    uint32_t keep_flags = p->flags & (PKT_ALLOC);
+    void (*keep_release_packet)(struct Packet_ *);
+    keep_release_packet = p->ReleasePacket;
+    PacketCleanup(p);
+    PacketInitialize(p);
+    p->flags = keep_flags;
+    p->ReleasePacket = keep_release_packet;
 }
 
 /**

@@ -199,10 +199,13 @@ void MpipeReleasePacket(Packet *p)
     gxio_mpipe_iqueue_t* iqueue = iqueues[p->mpipe_v.rank];
     int bucket = p->mpipe_v.idesc.bucket_id;
     gxio_mpipe_credit(iqueue->context, iqueue->ring, bucket, 1);
+    int stack_idx = p->mpipe_v.idesc.stack_idx;
+    void* va = (intptr_t)p->mpipe_v.idesc.va;
 
-    gxio_mpipe_push_buffer(context,
-                           p->mpipe_v.idesc.stack_idx,
-                           (void*)(intptr_t)p->mpipe_v.idesc.va);
+    PacketCleanup(p);
+    __insn_mf();
+
+    gxio_mpipe_push_buffer(context, stack_idx, va);
 }
 
 /* Unconditionally send packet, then release packet buffer. */
@@ -221,6 +224,7 @@ void MpipeReleasePacketCopyTap(Packet *p)
     edesc.hwb = 1; /* mPIPE will return packet buffer to proper stack. */
     edesc.size = p->mpipe_v.idesc.size;
     int channel = p->mpipe_v.idesc.channel;
+    PacketCleanup(p);
     /* Tell mPIPE to egress the packet. */
     gxio_mpipe_equeue_put(channel_to_equeue[channel].peer_equeue, edesc);
 }
@@ -254,7 +258,7 @@ Packet *MpipeProcessPacket(MpipeThreadVars *ptv, gxio_mpipe_idesc_t *idesc)
     u_char *pkt = gxio_mpipe_idesc_get_va(idesc);
     Packet *p = (Packet *)(pkt - sizeof(Packet) - headroom/*2*/);
 
-    PACKET_RECYCLE(p);
+    PacketInitialize(p);
     PKT_SET_SRC(p, PKT_SRC_WIRE);
 
     ptv->bytes += caplen;
@@ -609,8 +613,7 @@ static TmEcode ReceiveMpipeAllocatePacketBuffers(void)
         /* Push some buffers onto the stack. */
         for (int j = 0; j < num_buffers; j++) {
             Packet *p = (Packet *)packet_mem;
-            memset(p, 0, sizeof(Packet));
-            PACKET_INITIALIZE(p);
+            PacketInitialize(p);
           
             gxio_mpipe_push_buffer(context, stackidx, 
                                    packet_mem + sizeof(Packet));

@@ -113,6 +113,8 @@ Packet *PacketPoolGetPacket(void) {
         return NULL;
 
     Packet *p = RingBufferMrMwGetNoWait(ringbuffer);
+    PacketInitialize(p);
+    p->ReleasePacket = PacketPoolReturnPacket;
     return p;
 }
 
@@ -121,7 +123,7 @@ Packet *PacketPoolGetPacket(void) {
  */
 void PacketPoolReturnPacket(Packet *p)
 {
-    PACKET_RECYCLE(p);
+    PacketCleanup(p);
     RingBufferMrMwPut(ringbuffer, (void *)p);
 }
 
@@ -164,7 +166,8 @@ Packet *TmqhInputPacketpool(ThreadVars *t)
         p = RingBufferMrMwGet(ringbuffer);
     }
 
-    /* packet is clean */
+    PacketInitialize(p);
+    p->ReleasePacket = PacketPoolReturnPacket;
 
     return p;
 }

@@ -616,119 +616,17 @@ typedef struct DecodeThreadVars_
         (p)->icmpv6vars.comp_csum = -1;   \
     } while (0)
 
+
 /**
  *  \brief Initialize a packet structure for use.
  */
-#ifdef __SC_CUDA_SUPPORT__
-#include "util-cuda-handlers.h"
-#include "util-mpm.h"
 
-#define PACKET_INITIALIZE(p) do {                                       \
-        memset((p), 0x00, SIZE_OF_PACKET);                              \
-        SCMutexInit(&(p)->tunnel_mutex, NULL);                          \
-        PACKET_RESET_CHECKSUMS((p));                                    \
-        (p)->pkt = ((uint8_t *)(p)) + sizeof(Packet);                   \
-        (p)->livedev = NULL;                                            \
-        SCMutexInit(&(p)->cuda_pkt_vars.cuda_mutex, NULL);            \
-        SCCondInit(&(p)->cuda_pkt_vars.cuda_cond, NULL);                \
-    } while (0)
-#else
-#define PACKET_INITIALIZE(p) {         \
-    SCMutexInit(&(p)->tunnel_mutex, NULL); \
-    PACKET_RESET_CHECKSUMS((p)); \
-    (p)->pkt = ((uint8_t *)(p)) + sizeof(Packet); \
-    (p)->livedev = NULL; \
-}
-#endif
-
-/**
- *  \brief Recycle a packet structure for reuse.
- *  \todo the mutex destroy & init is necessary because of the memset, reconsider
- */
-#define PACKET_DO_RECYCLE(p) do {               \
-        CLEAR_ADDR(&(p)->src);                  \
-        CLEAR_ADDR(&(p)->dst);                  \
-        (p)->sp = 0;                            \
-        (p)->dp = 0;                            \
-        (p)->proto = 0;                         \
-        (p)->recursion_level = 0;               \
-        (p)->flags = (p)->flags & PKT_ALLOC;    \
-        (p)->flowflags = 0;                     \
-        (p)->pkt_src = 0;                       \
-        (p)->vlan_id[0] = 0;                    \
-        (p)->vlan_id[1] = 0;                    \
-        (p)->vlan_idx = 0;                      \
-        FlowDeReference(&((p)->flow));          \
-        (p)->ts.tv_sec = 0;                     \
-        (p)->ts.tv_usec = 0;                    \
-        (p)->datalink = 0;                      \
-        (p)->action = 0;                        \
-        if ((p)->pktvar != NULL) {              \
-            PktVarFree((p)->pktvar);            \
-            (p)->pktvar = NULL;                 \
-        }                                       \
-        (p)->ethh = NULL;                       \
-        if ((p)->ip4h != NULL) {                \
-            CLEAR_IPV4_PACKET((p));             \
-        }                                       \
-        if ((p)->ip6h != NULL) {                \
-            CLEAR_IPV6_PACKET((p));             \
-        }                                       \
-        if ((p)->tcph != NULL) {                \
-            CLEAR_TCP_PACKET((p));              \
-        }                                       \
-        if ((p)->udph != NULL) {                \
-            CLEAR_UDP_PACKET((p));              \
-        }                                       \
-        if ((p)->sctph != NULL) {               \
-            CLEAR_SCTP_PACKET((p));             \
-        }                                       \
-        if ((p)->icmpv4h != NULL) {             \
-            CLEAR_ICMPV4_PACKET((p));           \
-        }                                       \
-        if ((p)->icmpv6h != NULL) {             \
-            CLEAR_ICMPV6_PACKET((p));           \
-        }                                       \
-        (p)->ppph = NULL;                       \
-        (p)->pppoesh = NULL;                    \
-        (p)->pppoedh = NULL;                    \
-        (p)->greh = NULL;                       \
-        (p)->vlanh[0] = NULL;                   \
-        (p)->vlanh[1] = NULL;                   \
-        (p)->payload = NULL;                    \
-        (p)->payload_len = 0;                   \
-        (p)->pktlen = 0;                        \
-        (p)->alerts.cnt = 0;                    \
-        HostDeReference(&((p)->host_src));      \
-        HostDeReference(&((p)->host_dst));      \
-        (p)->pcap_cnt = 0;                      \
-        (p)->tunnel_rtv_cnt = 0;                \
-        (p)->tunnel_tpr_cnt = 0;                \
-        SCMutexDestroy(&(p)->tunnel_mutex);     \
-        SCMutexInit(&(p)->tunnel_mutex, NULL);  \
-        (p)->events.cnt = 0;                    \
-        AppLayerDecoderEventsResetEvents((p)->app_layer_events); \
-        (p)->next = NULL;                       \
-        (p)->prev = NULL;                       \
-        (p)->root = NULL;                       \
-        (p)->livedev = NULL;                    \
-        PACKET_RESET_CHECKSUMS((p));            \
-        PACKET_PROFILING_RESET((p));            \
-    } while (0)
-
-#define PACKET_RECYCLE(p) PACKET_DO_RECYCLE((p))
-
-/**
- *  \brief Cleanup a packet so that we can free it. No memset needed..
- */
-#define PACKET_CLEANUP(p) do {                  \
-        if ((p)->pktvar != NULL) {              \
-            PktVarFree((p)->pktvar);            \
-        }                                       \
-        SCMutexDestroy(&(p)->tunnel_mutex);     \
-        AppLayerDecoderEventsFreeEvents((p)->app_layer_events); \
-    } while (0)
-
+void PacketInitialize(Packet *p);
+void PacketCleanup(Packet *p);
+void PacketRecycle(Packet *p);
+#define PACKET_INITIALIZE(p) PacketInitialize(p)
+#define PACKET_CLEANUP(p) PacketCleanup(p)
+#define PACKET_RECYCLE(p) PacketRecycle(p)
 
 /* macro's for setting the action
  * handle the case of a root packet

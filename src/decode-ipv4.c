@@ -1484,7 +1484,7 @@ int DecodeIPV4DefragTest01(void)
         result = 0;
         goto end;
     }
-    PACKET_DO_RECYCLE(p);
+    PACKET_RECYCLE(p);
 
     PacketCopyData(p, pkt2, sizeof(pkt2));
     DecodeIPV4(&tv, &dtv, p, GET_PKT_DATA(p) + ETHERNET_HEADER_LEN,
@@ -1494,7 +1494,7 @@ int DecodeIPV4DefragTest01(void)
         result = 0;
         goto end;
     }
-    PACKET_DO_RECYCLE(p);
+    PACKET_RECYCLE(p);
 
     PacketCopyData(p, pkt3, sizeof(pkt3));
     DecodeIPV4(&tv, &dtv, p, GET_PKT_DATA(p) + ETHERNET_HEADER_LEN,
@@ -1620,7 +1620,7 @@ int DecodeIPV4DefragTest02(void)
         printf("tcp header should be NULL for ip fragment, but it isn't\n");
         goto end;
     }
-    PACKET_DO_RECYCLE(p);
+    PACKET_RECYCLE(p);
 
     PacketCopyData(p, pkt2, sizeof(pkt2));
     DecodeIPV4(&tv, &dtv, p, GET_PKT_DATA(p) + ETHERNET_HEADER_LEN,
@@ -1629,7 +1629,7 @@ int DecodeIPV4DefragTest02(void)
         printf("tcp header should be NULL for ip fragment, but it isn't\n");
         goto end;
     }
-    PACKET_DO_RECYCLE(p);
+    PACKET_RECYCLE(p);
 
     p->recursion_level = 3;
     PacketCopyData(p, pkt3, sizeof(pkt3));
@@ -1755,7 +1755,7 @@ int DecodeIPV4DefragTest03(void)
         goto end;
     }
     f = p->flow;
-    PACKET_DO_RECYCLE(p);
+    PACKET_RECYCLE(p);
 
     PacketCopyData(p, pkt1, sizeof(pkt1));
     DecodeIPV4(&tv, &dtv, p, GET_PKT_DATA(p) + ETHERNET_HEADER_LEN,
@@ -1765,7 +1765,7 @@ int DecodeIPV4DefragTest03(void)
         result = 0;
         goto end;
     }
-    PACKET_DO_RECYCLE(p);
+    PACKET_RECYCLE(p);
 
     PacketCopyData(p, pkt2, sizeof(pkt2));
     DecodeIPV4(&tv, &dtv, p, GET_PKT_DATA(p) + ETHERNET_HEADER_LEN,
@@ -1775,7 +1775,7 @@ int DecodeIPV4DefragTest03(void)
         result = 0;
         goto end;
     }
-    PACKET_DO_RECYCLE(p);
+    PACKET_RECYCLE(p);
 
     PacketCopyData(p, pkt3, sizeof(pkt3));
     DecodeIPV4(&tv, &dtv, p, GET_PKT_DATA(p) + ETHERNET_HEADER_LEN,
