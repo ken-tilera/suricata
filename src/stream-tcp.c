@@ -5415,7 +5415,6 @@ static int StreamTcpTest01 (void) {
         return 0;
     Flow f;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     p->flow = &f;
     int ret = 0;
@@ -5471,7 +5470,6 @@ static int StreamTcpTest02 (void) {
     memset(&stream_q, 0, sizeof(StreamMsgQueue));
     memset(&ra_ctx, 0, sizeof(TcpReassemblyThreadCtx));
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&stt, 0, sizeof (StreamTcpThread));
@@ -5566,7 +5564,6 @@ static int StreamTcpTest03 (void) {
     StreamTcpThread stt;
     TCPHdr tcph;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -5642,7 +5639,6 @@ static int StreamTcpTest04 (void) {
     StreamTcpThread stt;
     TCPHdr tcph;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -5712,7 +5708,6 @@ static int StreamTcpTest05 (void) {
     TCPHdr tcph;
     uint8_t payload[4];
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -5817,7 +5812,6 @@ static int StreamTcpTest06 (void) {
     StreamTcpThread stt;
     TCPHdr tcph;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -5887,7 +5881,6 @@ static int StreamTcpTest07 (void) {
     PacketQueue pq;
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
@@ -5976,7 +5969,6 @@ static int StreamTcpTest08 (void) {
     uint32_t data[2];
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -6065,7 +6057,6 @@ static int StreamTcpTest09 (void) {
     uint8_t payload[1] = {0x42};
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -6142,7 +6133,6 @@ static int StreamTcpTest10 (void) {
     TCPHdr tcph;
     uint8_t payload[4];
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -6244,7 +6234,6 @@ static int StreamTcpTest11 (void) {
     TCPHdr tcph;
     uint8_t payload[4];
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -6347,7 +6336,6 @@ static int StreamTcpTest12 (void) {
     TCPHdr tcph;
     uint8_t payload[4];
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -6443,7 +6431,6 @@ static int StreamTcpTest13 (void) {
     TCPHdr tcph;
     uint8_t payload[4];
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -6650,7 +6637,6 @@ static int StreamTcpTest14 (void) {
     memset(&pq,0,sizeof(PacketQueue));
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&stt, 0, sizeof (StreamTcpThread));
@@ -6815,7 +6801,6 @@ static int StreamTcp4WHSTest01 (void) {
     StreamTcpThread stt;
     TCPHdr tcph;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -6897,7 +6882,6 @@ static int StreamTcp4WHSTest02 (void) {
     StreamTcpThread stt;
     TCPHdr tcph;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -6968,7 +6952,6 @@ static int StreamTcp4WHSTest03 (void) {
     StreamTcpThread stt;
     TCPHdr tcph;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     PacketQueue pq;
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -7056,7 +7039,6 @@ static int StreamTcpTest15 (void) {
     memset(&pq,0,sizeof(PacketQueue));
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&stt, 0, sizeof (StreamTcpThread));
@@ -7228,7 +7210,6 @@ static int StreamTcpTest16 (void) {
     memset(&pq,0,sizeof(PacketQueue));
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&stt, 0, sizeof (StreamTcpThread));
@@ -7401,7 +7382,6 @@ static int StreamTcpTest17 (void) {
     memset(&pq,0,sizeof(PacketQueue));
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&stt, 0, sizeof (StreamTcpThread));
@@ -7566,7 +7546,6 @@ static int StreamTcpTest18 (void) {
     memset(&addr, 0, sizeof(addr));
     memset(&stream, 0, sizeof(stream));
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset(&ipv4h, 0, sizeof(ipv4h));
 
     StreamTcpInitConfig(TRUE);
@@ -7615,7 +7594,6 @@ static int StreamTcpTest19 (void) {
     memset(&addr, 0, sizeof(addr));
     memset(&stream, 0, sizeof(stream));
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset(&ipv4h, 0, sizeof(ipv4h));
 
     StreamTcpInitConfig(TRUE);
@@ -7667,7 +7645,6 @@ static int StreamTcpTest20 (void) {
     memset(&addr, 0, sizeof(addr));
     memset(&stream, 0, sizeof(stream));
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset(&ipv4h, 0, sizeof(ipv4h));
 
     StreamTcpInitConfig(TRUE);
@@ -7719,7 +7696,6 @@ static int StreamTcpTest21 (void) {
     memset(&addr, 0, sizeof(addr));
     memset(&stream, 0, sizeof(stream));
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset(&ipv4h, 0, sizeof(ipv4h));
 
     StreamTcpInitConfig(TRUE);
@@ -7771,7 +7747,6 @@ static int StreamTcpTest22 (void) {
     memset(&addr, 0, sizeof(addr));
     memset(&stream, 0, sizeof(stream));
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset(&ipv4h, 0, sizeof(ipv4h));
 
     StreamTcpInitConfig(TRUE);
@@ -7826,7 +7801,6 @@ static int StreamTcpTest23(void)
     memset(&pq,0,sizeof(PacketQueue));
     memset(&ssn, 0, sizeof (TcpSession));
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset(&f, 0, sizeof (Flow));
     memset(&tcph, 0, sizeof (TCPHdr));
     memset(&tv, 0, sizeof (ThreadVars));
@@ -7921,7 +7895,6 @@ static int StreamTcpTest24(void)
 
     memset(&ssn, 0, sizeof (TcpSession));
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset(&f, 0, sizeof (Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&tcph, 0, sizeof (TCPHdr));
@@ -8005,7 +7978,6 @@ static int StreamTcpTest25(void) {
     memset(&pq,0,sizeof(PacketQueue));
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&stt, 0, sizeof (StreamTcpThread));
@@ -8105,7 +8077,6 @@ static int StreamTcpTest26(void) {
     memset(&pq,0,sizeof(PacketQueue));
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&stt, 0, sizeof (StreamTcpThread));
@@ -8201,7 +8172,6 @@ static int StreamTcpTest27(void) {
     memset(&pq,0,sizeof(PacketQueue));
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&stt, 0, sizeof (StreamTcpThread));
@@ -9191,7 +9161,6 @@ static int StreamTcpTest37(void) {
     memset(&pq,0,sizeof(PacketQueue));
 
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
     memset (&f, 0, sizeof(Flow));
     memset(&tv, 0, sizeof (ThreadVars));
     memset(&stt, 0, sizeof (StreamTcpThread));
@@ -9324,7 +9293,6 @@ static int StreamTcpTest38 (void) {
     if (unlikely(p == NULL))
         return 0;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
 
     p->flow = &f;
     tcph.th_win = htons(5480);
@@ -9443,7 +9411,6 @@ static int StreamTcpTest39 (void) {
     if (unlikely(p == NULL))
         return 0;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
 
     p->flow = &f;
     tcph.th_win = htons(5480);
@@ -9672,7 +9639,6 @@ static int StreamTcpTest42 (void) {
     if (unlikely(p == NULL))
         return 0;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
 
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -9764,7 +9730,6 @@ static int StreamTcpTest43 (void) {
     if (unlikely(p == NULL))
         return 0;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
 
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -9856,7 +9821,6 @@ static int StreamTcpTest44 (void) {
     if (unlikely(p == NULL))
         return 0;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
 
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));
@@ -9943,7 +9907,6 @@ static int StreamTcpTest45 (void) {
     if (unlikely(p == NULL))
         return 0;
     memset(p, 0, SIZE_OF_PACKET);
-    p->pkt = (uint8_t *)(p + 1);
 
     memset(&pq,0,sizeof(PacketQueue));
     memset (&f, 0, sizeof(Flow));

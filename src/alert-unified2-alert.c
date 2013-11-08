@@ -1534,7 +1534,6 @@ static int Unified2Test01 (void)   {
     memset(&dtv, 0, sizeof(DecodeThreadVars));
     memset(&tv, 0, sizeof(ThreadVars));
     memset(&pq, 0, sizeof(PacketQueue));
-    p->pkt = (uint8_t *)(p + 1);
     memset(&s, 0, sizeof(Signature));
 
     p->alerts.cnt++;
@@ -1625,7 +1624,6 @@ static int Unified2Test02 (void)   {
     memset(&dtv, 0, sizeof(DecodeThreadVars));
     memset(&tv, 0, sizeof(ThreadVars));
     memset(&pq, 0, sizeof(PacketQueue));
-    p->pkt = (uint8_t *)(p + 1);
     memset(&s, 0, sizeof(Signature));
 
     p->alerts.cnt++;
@@ -1722,7 +1720,6 @@ static int Unified2Test03 (void) {
     memset(&dtv, 0, sizeof(DecodeThreadVars));
     memset(&tv, 0, sizeof(ThreadVars));
     memset(&pq, 0, sizeof(PacketQueue));
-    p->pkt = (uint8_t *)(p + 1);
     memset(&s, 0, sizeof(Signature));
 
     p->alerts.cnt++;
@@ -1819,7 +1816,6 @@ static int Unified2Test04 (void)   {
     memset(&dtv, 0, sizeof(DecodeThreadVars));
     memset(&tv, 0, sizeof(ThreadVars));
     memset(&pq, 0, sizeof(PacketQueue));
-    p->pkt = (uint8_t *)(p + 1);
     memset(&s, 0, sizeof(Signature));
 
     p->alerts.cnt++;
@@ -1907,7 +1903,6 @@ static int Unified2Test05 (void)   {
     memset(&dtv, 0, sizeof(DecodeThreadVars));
     memset(&tv, 0, sizeof(ThreadVars));
     memset(&pq, 0, sizeof(PacketQueue));
-    p->pkt = (uint8_t *)(p + 1);
     memset(&s, 0, sizeof(Signature));
 
     p->alerts.cnt++;

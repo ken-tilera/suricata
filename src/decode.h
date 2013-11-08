@@ -198,8 +198,8 @@ typedef struct Address_ {
 #define GET_TCP_DST_PORT(p)  ((p)->dp)
 
 #define GET_PKT_LEN(p) ((p)->pktlen)
-#define GET_PKT_DATA(p) ((((p)->ext_pkt) == NULL ) ? (p)->pkt : (p)->ext_pkt)
-#define GET_PKT_DIRECT_DATA(p) ((p)->pkt)
+#define GET_PKT_DATA(p) ((((p)->ext_pkt) == NULL ) ? (uint8_t *)((p) + 1) : (p)->ext_pkt)
+#define GET_PKT_DIRECT_DATA(p) (uint8_t *)((p) + 1)
 #define GET_PKT_DIRECT_MAX_SIZE(p) (default_packet_size)
 
 #define SET_PKT_LEN(p, len) do { \
@@ -462,7 +462,6 @@ typedef struct Packet_
     uint16_t payload_len;
 
     /* storage: set to pointer to heap and extended via allocation if necessary */
-    uint8_t *pkt;
     uint8_t *ext_pkt;
     uint32_t pktlen;
 
