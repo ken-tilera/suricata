@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2013 Open Information Security Foundation
+/* Copyright (C) 2007-2014 Open Information Security Foundation
  *
  * You can copy, redistribute or modify this Program under the terms of
  * the GNU General Public License version 2 as published by the Free
@@ -196,7 +196,8 @@ TmEcode AlertFastLogThreadDeinit(ThreadVars *t, void *data)
     return TM_ECODE_OK;
 }
 
-void AlertFastLogExitPrintStats(ThreadVars *tv, void *data) {
+void AlertFastLogExitPrintStats(ThreadVars *tv, void *data)
+{
     AlertFastLogThread *aft = (AlertFastLogThread *)data;
     if (aft == NULL) {
         return;
@@ -243,7 +244,7 @@ static void AlertFastLogDeInitCtx(OutputCtx *output_ctx)
 
 #ifdef UNITTESTS
 
-int AlertFastLogTest01()
+static int AlertFastLogTest01()
 {
     int result = 0;
     uint8_t *buf = (uint8_t *) "GET /one/ HTTP/1.1\r\n"
@@ -291,7 +292,7 @@ int AlertFastLogTest01()
     return result;
 }
 
-int AlertFastLogTest02()
+static int AlertFastLogTest02()
 {
     int result = 0;
     uint8_t *buf = (uint8_t *) "GET /one/ HTTP/1.1\r\n"
