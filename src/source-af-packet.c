@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 Open Information Security Foundation
+/* Copyright (C) 2011-2014 Open Information Security Foundation
  *
  * You can copy, redistribute or modify this Program under the terms of
  * the GNU General Public License version 2 as published by the Free
@@ -239,7 +239,6 @@ typedef struct AFPThreadVars_
 
 } AFPThreadVars;
 
-TmEcode ReceiveAFP(ThreadVars *, Packet *, void *, PacketQueue *, PacketQueue *);
 TmEcode ReceiveAFPThreadInit(ThreadVars *, void *, void **);
 void ReceiveAFPThreadExitStats(ThreadVars *, void *);
 TmEcode ReceiveAFPThreadDeinit(ThreadVars *, void *);
