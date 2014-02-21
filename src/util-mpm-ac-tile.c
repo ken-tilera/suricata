@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Open Information Security Foundation
+/* Copyright (C) 2013-2014 Open Information Security Foundation
  *
  * You can copy, redistribute or modify this Program under the terms of
  * the GNU General Public License version 2 as published by the Free
@@ -163,6 +163,8 @@ typedef struct StateQueue_ {
     int32_t store[STATE_QUEUE_CONTAINER_SIZE];
     int top;
     int bot;
+    /* Array indexed by state. True if state enqueued. */
+    uint8_t *visited;
 } StateQueue;
 
 /**
@@ -698,6 +700,31 @@ static inline void SCACTileCreateGotoTable(MpmCtx *mpm_ctx)
     return;
 }
 
+static StateQueue *SCACTileStateQueueCreate(int state_count)
+{
+    StateQueue *q = SCCalloc(sizeof(StateQueue), 1);
+    if (q == NULL) {
+        SCLogError(SC_ERR_MEM_ALLOC, "Error allocating memory");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Keep track of states already visited to only visit them once.
+     * This is faster than checking for duplicates in the queue.
+     */
+    q->visited = SCCalloc(state_count, 1);
+    if (q->visited == NULL) {
+        SCLogError(SC_ERR_MEM_ALLOC, "Error allocating memory");
+        exit(EXIT_FAILURE);
+    }
+}
+
+static void SCACTileStateQueueDestroy(StateQueue *q)
+{
+    SCFree(q->visited);
+    SCFree(q);
+}
+
+
 static inline int SCACTileStateQueueIsEmpty(StateQueue *q)
 {
     if (q->top == q->bot)
@@ -708,13 +735,10 @@ static inline int SCACTileStateQueueIsEmpty(StateQueue *q)
 
 static inline void SCACTileEnqueue(StateQueue *q, int32_t state)
 {
-    int i = 0;
-
-    /*if we already have this */
-    for (i = q->bot; i < q->top; i++) {
-        if (q->store[i] == state)
-            return;
-    }
+    /* If we already have this state. */
+    if (q->visited[state])
+        return;
+    q->visited[state] = 1;
 
     q->store[q->top++] = state;
 
@@ -726,8 +750,6 @@ static inline void SCACTileEnqueue(StateQueue *q, int32_t state)
                       "Fatal Error.  Exiting.  Please file a bug report on this");
         exit(EXIT_FAILURE);
     }
-
-    return;
 }
 
 static inline int32_t SCACTileDequeue(StateQueue *q)
@@ -809,17 +831,15 @@ static inline void SCACTileCreateFailureTable(MpmCtx *mpm_ctx)
     int32_t state = 0;
     int32_t r_state = 0;
 
-    StateQueue q;
-    memset(&q, 0, sizeof(StateQueue));
+    StateQueue *q = SCACTileStateQueueCreate(ctx->state_count);
 
     /* Allocate space for the failure table.  A failure entry in the table for
      * every state(SCACTileCtx->state_count) */
-    ctx->failure_table = SCMalloc(ctx->state_count * sizeof(int32_t));
+    ctx->failure_table = SCCalloc(ctx->state_count, sizeof(int32_t));
     if (ctx->failure_table == NULL) {
         SCLogError(SC_ERR_MEM_ALLOC, "Error allocating memory");
         exit(EXIT_FAILURE);
     }
-    memset(ctx->failure_table, 0, ctx->state_count * sizeof(int32_t));
 
     /* Add the failure transitions for the 0th state, and add every non-fail
      * transition from the 0th state to the queue for further processing
@@ -827,21 +847,22 @@ static inline void SCACTileCreateFailureTable(MpmCtx *mpm_ctx)
     for (aa = 0; aa < ctx->alphabet_size; aa++) {
         int32_t temp_state = ctx->goto_table[0][aa];
         if (temp_state != 0) {
-            SCACTileEnqueue(&q, temp_state);
+            SCACTileEnqueue(q, temp_state);
             ctx->failure_table[temp_state] = 0;
         }
     }
 
-    while (!SCACTileStateQueueIsEmpty(&q)) {
+    while (!SCACTileStateQueueIsEmpty(q)) {
         /* pick up every state from the queue and add failure transitions */
-        r_state = SCACTileDequeue(&q);
+        r_state = SCACTileDequeue(q);
         for (aa = 0; aa < ctx->alphabet_size; aa++) {
             int32_t temp_state = ctx->goto_table[r_state][aa];
             if (temp_state == SC_AC_TILE_FAIL)
                 continue;
-            SCACTileEnqueue(&q, temp_state);
-            state = ctx->failure_table[r_state];
 
+            SCACTileEnqueue(q, temp_state);
+
+            state = ctx->failure_table[r_state];
             while(ctx->goto_table[state][aa] == SC_AC_TILE_FAIL)
                 state = ctx->failure_table[state];
             ctx->failure_table[temp_state] = ctx->goto_table[state][aa];
@@ -850,7 +871,7 @@ static inline void SCACTileCreateFailureTable(MpmCtx *mpm_ctx)
         }
     }
 
-    return;
+    SCACTileStateQueueDestroy(q);
 }
 
 /*
@@ -985,28 +1006,28 @@ static inline void SCACTileCreateDeltaTable(MpmCtx *mpm_ctx)
         ctx->alphabet_storage = 256; /* Change? */
     }
 
-    StateQueue q;
-    memset(&q, 0, sizeof(StateQueue));
+    StateQueue *q = SCACTileStateQueueCreate(ctx->state_count);
 
     for (aa = 0; aa < ctx->alphabet_size; aa++) {
         int temp_state = ctx->goto_table[0][aa];
         if (temp_state != 0)
-            SCACTileEnqueue(&q, temp_state);
+            SCACTileEnqueue(q, temp_state);
     }
 
-    while (!SCACTileStateQueueIsEmpty(&q)) {
-        r_state = SCACTileDequeue(&q);
+    while (!SCACTileStateQueueIsEmpty(q)) {
+        r_state = SCACTileDequeue(q);
 
         for (aa = 0; aa < ctx->alphabet_size; aa++) {
             int temp_state = ctx->goto_table[r_state][aa];
             if (temp_state != SC_AC_TILE_FAIL) {
-                SCACTileEnqueue(&q, temp_state);
+                SCACTileEnqueue(q, temp_state);
             } else {
                 int f_state = ctx->failure_table[r_state];
                 ctx->goto_table[r_state][aa] = ctx->goto_table[f_state][aa];
             }
         }
     }
+    SCACTileStateQueueDestroy(q);
 }
 
 static inline void SCACTileClubOutputStatePresenceWithDeltaTable(MpmCtx *mpm_ctx)
