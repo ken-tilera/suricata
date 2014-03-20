@@ -5206,8 +5206,6 @@ void StreamTcpSetSessionNoReassemblyFlag (TcpSession *ssn, char direction)
         IPV4_SET_RAW_IPLEN(nipv4h, IPV4_GET_RAW_IPLEN(ipv4h)); \
         IPV4_SET_RAW_IPTOS(nipv4h, IPV4_GET_RAW_IPTOS(ipv4h)); \
         IPV4_SET_RAW_IPPROTO(nipv4h, IPV4_GET_RAW_IPPROTO(ipv4h)); \
-        (nipv4h)->s_ip_src = IPV4_GET_RAW_IPDST(ipv4h); \
-        (nipv4h)->s_ip_dst = IPV4_GET_RAW_IPSRC(ipv4h); \
     } while (0)
 
 #define PSEUDO_PKT_SET_IPV6HDR(nipv6h,ipv6h) do { \
@@ -5223,8 +5221,6 @@ void StreamTcpSetSessionNoReassemblyFlag (TcpSession *ssn, char direction)
     } while (0)
 
 #define PSEUDO_PKT_SET_TCPHDR(ntcph,tcph) do { \
-        COPY_PORT((tcph)->th_dport, (ntcph)->th_sport); \
-        COPY_PORT((tcph)->th_sport, (ntcph)->th_dport); \
         (ntcph)->th_seq = (tcph)->th_ack; \
         (ntcph)->th_ack = (tcph)->th_seq; \
     } while (0)
