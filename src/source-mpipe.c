@@ -938,9 +938,6 @@ TmEcode ReceiveMpipeThreadInit(ThreadVars *tv, void *initdata, void **data)
                                                          i, aconf->copy_mode,
                                                          mpipe_conf);
                     if (channel < 0) {
-                        SCLogError(SC_ERR_INVALID_ARGUMENT,
-                                   "mPIPE IPS open of %s failed.", 
-                                   aconf->out_iface);
                         SCReturnInt(TM_ECODE_FAILED);
                     }
                 }
@@ -968,17 +965,12 @@ TmEcode ReceiveMpipeThreadInit(ThreadVars *tv, void *initdata, void **data)
     int rc;
     rc = ReceiveMpipeCreateBuckets(first_notif_ring, num_workers,
                                    &first_bucket, &num_buckets);
-    if (rc != TM_ECODE_OK) {
-        SCLogError(SC_ERR_INVALID_ARGUMENT,
-                   "mPIPE Create Buckets: %s", gxio_strerror(rc));
+    if (rc != TM_ECODE_OK)
         SCReturnInt(rc);
-    }
+
     rc = ReceiveMpipeAllocatePacketBuffers();
-    if (rc != TM_ECODE_OK) {
-        SCLogError(SC_ERR_INVALID_ARGUMENT,
-                   "mPIPE Allocate Packet Buffers: %s", gxio_strerror(rc));
+    if (rc != TM_ECODE_OK)
         SCReturnInt(rc);
-    }
 
     result = ReceiveMpipeRegisterRules(first_bucket, num_buckets);
     if (result < 0) {

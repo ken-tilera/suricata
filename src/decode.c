@@ -73,7 +73,7 @@ int DecodeTunnel(ThreadVars *tv, DecodeThreadVars *dtv, Packet *p,
             return DecodeIPV4(tv, dtv, p, pkt, len, pq);
         case IPPROTO_IPV6:
             return DecodeIPV6(tv, dtv, p, pkt, len, pq);
-        case VLAN_OVER_GRE:
+       case VLAN_OVER_GRE:
             return DecodeVLAN(tv, dtv, p, pkt, len, pq);
         default:
             SCLogInfo("FIXME: DecodeTunnel: protocol %" PRIu32 " not supported.", proto);
