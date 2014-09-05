@@ -1036,7 +1036,7 @@ static void SCACTileClubOutputStatePresenceWithDeltaTable(MpmCtx *mpm_ctx)
     SCACTileCtx *ctx = search_ctx->init_ctx;
 
     int aa = 0;
-    int state = 0;
+    uint32_t state = 0;
 
     /* Allocate next-state table. */
     int size = ctx->state_count * ctx->bytes_per_state * ctx->alphabet_storage;
@@ -1072,7 +1072,7 @@ static inline void SCACTileInsertCaseSensitiveEntriesForPatterns(MpmCtx *mpm_ctx
     SCACTileSearchCtx *search_ctx = (SCACTileSearchCtx *)mpm_ctx->ctx;
     SCACTileCtx *ctx = search_ctx->init_ctx;
 
-    int state = 0;
+    uint32_t state = 0;
     uint32_t k = 0;
 
     for (state = 0; state < ctx->state_count; state++) {
@@ -1380,7 +1380,7 @@ static void SCACTileDestroyInitCtx(MpmCtx *mpm_ctx)
     }
 
     if (ctx->output_table != NULL) {
-        int state;
+        uint32_t state;
         for (state = 0; state < ctx->state_count; state++) {
             if (ctx->output_table[state].pids != NULL) {
                 SCFree(ctx->output_table[state].pids);
@@ -1452,9 +1452,12 @@ int CheckMatch(SCACTileSearchCtx *ctx, PatternMatcherQueue *pmq,
     uint8_t *bitarray = pmq->pattern_id_bitarray;
     uint32_t k;
 
-    /* Where to start storing new patterns */
+    /* Where to start storing new patterns and SIDs */
     uint32_t *orig_pattern = pmq->pattern_id_array + pmq->pattern_id_array_cnt;
+    uint32_t *orig_sids = pmq->rule_id_array + pmq->rule_id_array_cnt;
+
     uint32_t *new_pattern = orig_pattern;
+    uint32_t *new_sids = orig_sids;
 
     for (k = 0; k < no_of_entries; k++) {
         uint16_t lower_pid = pids[k] & 0x0000FFFF;
@@ -1473,18 +1476,18 @@ int CheckMatch(SCACTileSearchCtx *ctx, PatternMatcherQueue *pmq,
 
             // Add SIDs for this pattern
             // TODO - Keep local pointer to update.
-            uint32_t x;
-            for (x = 0; x < pid_pat_list[lower_pid].sids_size; x++) {
-                pmq->rule_id_array[pmq->rule_id_array_cnt++] = pid_pat_list[lower_pid].sids[x];
-            }
+            memcpy(new_sids, pid_pat_list[lower_pid].sids, pid_pat_list[lower_pid].sids_size * sizeof(uint32_t));
+            new_sids += pid_pat_list[lower_pid].sids_size;
         }
         matches++;
     }
     /* Only update the pattern count if a new pattern was added.
      * No need to compute it or dirty that cache data for no change.
      */
-    if (new_pattern != orig_pattern)
+    if (new_pattern != orig_pattern) {
         pmq->pattern_id_array_cnt = new_pattern - orig_pattern;
+        pmq->rule_id_array_cnt = new_sids - orig_sids;
+    }
 
     return matches;
 }
