@@ -37,7 +37,20 @@ void DetectFlowvarRegister (void);
 
 int DetectFlowvarPostMatchSetup(Signature *s, uint16_t idx);
 int DetectFlowvarStoreMatch(DetectEngineThreadCtx *, uint16_t, uint8_t *, uint16_t, int);
-void DetectFlowvarProcessList(DetectEngineThreadCtx *det_ctx, Flow *);
+
+/* For use only by DetectFlowvarProcessList() */
+void DetectFlowvarProcessListInternal(DetectFlowvarList *fs, Flow *f);
+static inline void DetectFlowvarProcessList(DetectEngineThreadCtx *det_ctx, Flow *f)
+{
+    DetectFlowvarList *fs = det_ctx->flowvarlist;
+
+    SCLogDebug("det_ctx->flowvarlist %p", fs);
+
+    if (fs != NULL) {
+        det_ctx->flowvarlist = NULL;
+        DetectFlowvarProcessListInternal(fs, f);
+    }
+}
 
 #endif /* __DETECT_FLOWVAR_H__ */
 
