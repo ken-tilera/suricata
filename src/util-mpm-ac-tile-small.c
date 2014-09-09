@@ -41,6 +41,11 @@ uint32_t FUNC_NAME(SCACTileSearchCtx *ctx, MpmThreadCtx *mpm_thread_ctx,
     STYPE *state_table = (STYPE*)ctx->state_table;
     STYPE state = 0;
     int c = xlate[buf[0]];
+
+    uint32_t local_size = ctx->local_bitarray_size;
+    uint8_t local_bitarray[local_size];
+    memset(&local_bitarray, 0, local_size);
+
     /* If buflen at least 4 bytes and buf 4-byte aligned. */
     if (buflen >= 4 && ((uint64_t)buf & 0x3) == 0) {
         BTYPE data = *(BTYPE* restrict)(&buf[0]);
@@ -53,21 +58,21 @@ uint32_t FUNC_NAME(SCACTileSearchCtx *ctx, MpmThreadCtx *mpm_thread_ctx,
             state = SLOAD(state_table + index + c);
             c = xlate[BYTE1(data)];
             if (unlikely(SCHECK(state))) {
-                matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches);
+              matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches, local_bitarray);
             }
             i++;
             index = SINDEX(index, state);
             state = SLOAD(state_table + index + c);
             c = xlate[BYTE2(data)];
             if (unlikely(SCHECK(state))) {
-                matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches);
+                matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches, local_bitarray);
             }
             i++;
             index = SINDEX(index, state);
             state = SLOAD(state_table + index + c);
             c = xlate[BYTE3(data)];
             if (unlikely(SCHECK(state))) {
-                matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches);
+                matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches, local_bitarray);
             }
             data = data1;
             i++;
@@ -75,7 +80,7 @@ uint32_t FUNC_NAME(SCACTileSearchCtx *ctx, MpmThreadCtx *mpm_thread_ctx,
             state = SLOAD(state_table + index + c);
             c = xlate[BYTE0(data)];
             if (unlikely(SCHECK(state))) {
-                matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches);
+                matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches, local_bitarray);
             }
             i++;
         }
@@ -87,7 +92,7 @@ uint32_t FUNC_NAME(SCACTileSearchCtx *ctx, MpmThreadCtx *mpm_thread_ctx,
         state = SLOAD(state_table + index + c);
         c = xlate[buf[i+1]];
         if (unlikely(SCHECK(state))) {
-            matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches);
+            matches = CheckMatch(ctx, pmq, buf, buflen, state, i, matches, local_bitarray);
         }
     } /* for (i = 0; i < buflen; i++) */
 
