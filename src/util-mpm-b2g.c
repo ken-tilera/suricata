@@ -492,6 +492,8 @@ static void B2gPrepareHash(MpmCtx *mpm_ctx)
                 hi->id = ctx->parray[i]->id;
                 hi->ci = ctx->parray[i]->ci;
                 hi->cs = ctx->parray[i]->cs;
+                hi->sids = ctx->parray[i]->sids;
+                hi->sids_size = ctx->parray[i]->sids_size;
 
             } else {
                 B2gPattern *hi = B2gAllocHashItem(mpm_ctx);
@@ -504,6 +506,8 @@ static void B2gPrepareHash(MpmCtx *mpm_ctx)
                 hi->id = ctx->parray[i]->id;
                 hi->ci = ctx->parray[i]->ci;
                 hi->cs = ctx->parray[i]->cs;
+                hi->sids = ctx->parray[i]->sids;
+                hi->sids_size = ctx->parray[i]->sids_size;
 
                 /* Append this HashItem to the list */
                 B2gPattern *thi = &ctx->hash1[idx8];
@@ -552,6 +556,9 @@ static void B2gPrepareHash(MpmCtx *mpm_ctx)
                 hi->id = ctx->parray[i]->id;
                 hi->ci = ctx->parray[i]->ci;
                 hi->cs = ctx->parray[i]->cs;
+                hi->sids = ctx->parray[i]->sids;
+                hi->sids_size = ctx->parray[i]->sids_size;
+
                 ctx->hash[idx] = hi;
             } else {
                 B2gPattern *hi = B2gAllocHashItem(mpm_ctx);
@@ -565,6 +572,9 @@ static void B2gPrepareHash(MpmCtx *mpm_ctx)
                 hi->id = ctx->parray[i]->id;
                 hi->ci = ctx->parray[i]->ci;
                 hi->cs = ctx->parray[i]->cs;
+                hi->sids = ctx->parray[i]->sids;
+                hi->sids_size = ctx->parray[i]->sids_size;
+
                 if (ctx->parray[i]->len < ctx->pminlen[idx])
                     ctx->pminlen[idx] = ctx->parray[i]->len;
 

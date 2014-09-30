@@ -480,7 +480,7 @@ int PmqSetup(PatternMatcherQueue *pmq, uint32_t patmaxid)
  */
 int
 MpmVerifyMatch(MpmThreadCtx *thread_ctx, PatternMatcherQueue *pmq, uint32_t patid,
-               uint8_t *bitarray, uint32_t *sids, uint32_t sid_size)
+               uint8_t *bitarray, uint32_t *sids, uint32_t sids_size)
 {
     SCEnter();
 
@@ -496,6 +496,14 @@ MpmVerifyMatch(MpmThreadCtx *thread_ctx, PatternMatcherQueue *pmq, uint32_t pati
             pmq->pattern_id_array[pmq->pattern_id_array_cnt] = patid;
             pmq->pattern_id_array_cnt++;
             SCLogDebug("pattern_id_array_cnt %u", pmq->pattern_id_array_cnt);
+
+            SCLogDebug("Adding %u sids", sids_size);
+            // Add SIDs for this pattern
+            uint32_t x;
+            for (x = 0; x < sids_size; x++) {
+                pmq->rule_id_array[pmq->rule_id_array_cnt++] = sids[x];
+            }
+
         }
     }
 
