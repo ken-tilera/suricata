@@ -1036,7 +1036,7 @@ static void SCACTileClubOutputStatePresenceWithDeltaTable(MpmCtx *mpm_ctx)
     SCACTileCtx *ctx = search_ctx->init_ctx;
 
     int aa = 0;
-    int state = 0;
+    uint32_t state;
 
     /* Allocate next-state table. */
     int size = ctx->state_count * ctx->bytes_per_state * ctx->alphabet_storage;
@@ -1072,8 +1072,8 @@ static inline void SCACTileInsertCaseSensitiveEntriesForPatterns(MpmCtx *mpm_ctx
     SCACTileSearchCtx *search_ctx = (SCACTileSearchCtx *)mpm_ctx->ctx;
     SCACTileCtx *ctx = search_ctx->init_ctx;
 
-    int state = 0;
-    uint32_t k = 0;
+    uint32_t state;
+    uint32_t k;
 
     for (state = 0; state < ctx->state_count; state++) {
         if (ctx->output_table[state].no_of_entries == 0)
@@ -1380,7 +1380,7 @@ static void SCACTileDestroyInitCtx(MpmCtx *mpm_ctx)
     }
 
     if (ctx->output_table != NULL) {
-        int state;
+        uint32_t state;
         for (state = 0; state < ctx->state_count; state++) {
             if (ctx->output_table[state].pids != NULL) {
                 SCFree(ctx->output_table[state].pids);
@@ -1528,7 +1528,7 @@ uint32_t SCACTileSearchLarge(SCACTileSearchCtx *ctx, MpmThreadCtx *mpm_thread_ct
     memset(bitarray, 0, pmq->pattern_id_bitarray_size);
 
     uint8_t* restrict xlate = ctx->translate_table;
-    register int state = 0;
+    register uint32_t state = 0;
     int32_t (*state_table_u32)[256] = ctx->state_table;
     for (i = 0; i < buflen; i++) {
         state = state_table_u32[state & 0x00FFFFFF][xlate[buf[i]]];
