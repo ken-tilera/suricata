@@ -1740,8 +1740,11 @@ int SigMatchSignatures(ThreadVars *th_v, DetectEngineCtx *de_ctx, DetectEngineTh
         alerts++;
 next:
         DetectFlowvarProcessList(det_ctx, pflow);
-        DetectReplaceFree(det_ctx->replist);
-        det_ctx->replist = NULL;
+        DetectReplaceList *replist = det_ctx->replist;
+        if (unlikely(replist)) {
+            det_ctx->replist = NULL;
+            DetectReplaceFree(replist);
+        }
         RULE_PROFILING_END(det_ctx, s, smatch, p);
 
         det_ctx->flags = 0;
