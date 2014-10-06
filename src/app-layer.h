@@ -108,8 +108,22 @@ AppLayerThreadCtx *AppLayerGetCtxThread(ThreadVars *tv);
 void AppLayerDestroyCtxThread(AppLayerThreadCtx *tctx);
 
 
-void AppLayerProfilingReset(AppLayerThreadCtx *tctx);
-void AppLayerProfilingStore(AppLayerThreadCtx *tctx, Packet *p);
+/***** Profiling *****/
+
+static inline void AppLayerProfilingReset(AppLayerThreadCtx *app_tctx)
+{
+#ifdef PROFILING
+    PACKET_PROFILING_APP_RESET(app_tctx);
+#endif
+}
+
+static inline void AppLayerProfilingStore(AppLayerThreadCtx *app_tctx, Packet *p)
+{
+#ifdef PROFILING
+    PACKET_PROFILING_APP_STORE(app_tctx, p);
+#endif
+}
+
 
 /***** Unittests *****/
 
