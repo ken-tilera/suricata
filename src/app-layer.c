@@ -656,22 +656,6 @@ void AppLayerDestroyCtxThread(AppLayerThreadCtx *app_tctx)
     SCReturn;
 }
 
-/* profiling */
-
-void AppLayerProfilingReset(AppLayerThreadCtx *app_tctx)
-{
-#ifdef PROFILING
-    PACKET_PROFILING_APP_RESET(app_tctx);
-#endif
-}
-
-void AppLayerProfilingStore(AppLayerThreadCtx *app_tctx, Packet *p)
-{
-#ifdef PROFILING
-    PACKET_PROFILING_APP_STORE(app_tctx, p);
-#endif
-}
-
 /***** Unittests *****/
 
 #ifdef UNITTESTS
