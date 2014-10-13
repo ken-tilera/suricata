@@ -282,25 +282,8 @@ void MpmAddSidsResize(PatternMatcherQueue *pmq, uint32_t new_size);
  *  \param sids_size number of Signature IDs in sids array.
  *
  */
-static inline void
-MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
-{
-    if (sids_size == 0)
-        return;
-
-    uint32_t new_size = pmq->rule_id_array_cnt + sids_size;
-    if (new_size > pmq->rule_id_array_size) {
-        MpmAddSidsResize(pmq, new_size);
-    }
-    SCLogDebug("Adding %u sids", sids_size);
-    // Add SIDs for this pattern to the end of the array
-    uint32_t *ptr = pmq->rule_id_array + pmq->rule_id_array_cnt;
-    uint32_t *end = ptr + sids_size;
-    do {
-        *ptr++ = *sids++;
-    } while (ptr != end);
-    pmq->rule_id_array_cnt += sids_size;
-}
+void
+MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size);
 
 /* Resize Pattern ID array. Only called from MpmAddPid(). */
 void MpmAddPidResize(PatternMatcherQueue *pmq, uint32_t new_size);
