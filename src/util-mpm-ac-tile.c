@@ -1182,6 +1182,13 @@ static void SCACTilePrepareSearch(MpmCtx *mpm_ctx)
     SCACTileDestroyInitCtx(mpm_ctx);
 }
 
+static int DoSort(const void *a, const void *b)
+{
+    uint32_t x = *(uint32_t *)a;
+    uint32_t y = *(uint32_t *)b;
+    return x - y;
+}
+
 /**
  * \brief Process the patterns added to the mpm, and create the internal tables.
  *
@@ -1247,6 +1254,11 @@ int SCACTilePreparePatterns(MpmCtx *mpm_ctx)
         /* ACPatternList now owns this memory */
         ctx->pattern_list[i].sids_size = ctx->parray[i]->sids_size;
         ctx->pattern_list[i].sids = ctx->parray[i]->sids;
+
+        /* Sort the rule list. There should be no duplicates. */
+        if (ctx->pattern_list[i].sids_size)
+            qsort(ctx->pattern_list[i].sids, ctx->pattern_list[i].sids_size,
+                  sizeof(uint32_t), DoSort);
     }
 
     /* prepare the state table required by AC */
