@@ -272,6 +272,9 @@ int MpmAddPatternCI(struct MpmCtx_ *mpm_ctx, uint8_t *pat, uint16_t patlen,
 /* Resize Signature ID array. Only called from MpmAddSids(). */
 void MpmAddSidsResize(PatternMatcherQueue *pmq, uint32_t new_size);
 
+void
+MpmAddSidsMerge(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size);
+
 /** \brief Add array of Signature IDs to rule ID array.
  *
  *   Checks size of the array first. Calls MpmAddSidsResize to increase
@@ -282,8 +285,25 @@ void MpmAddSidsResize(PatternMatcherQueue *pmq, uint32_t new_size);
  *  \param sids_size number of Signature IDs in sids array.
  *
  */
-void
-MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size);
+static inline void
+MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
+{
+    if (sids_size == 0)
+        return;
+
+    if (pmq->rule_id_array_cnt == 0) {
+        /* No existing list, so just copy in the new list */
+        if (sids_size > pmq->rule_id_array_size)
+            MpmAddSidsResize(pmq, sids_size);
+        uint32_t *existing_head = pmq->rule_id_array;
+        uint32_t *sids_end = sids + sids_size;
+        do {
+            *existing_head++ = *sids++;
+        } while (sids != sids_end);
+        pmq->rule_id_array_cnt = sids_size;
+    } else
+        MpmAddSidsMerge(pmq, sids, sids_size);
+}
 
 /* Resize Pattern ID array. Only called from MpmAddPid(). */
 void MpmAddPidResize(PatternMatcherQueue *pmq, uint32_t new_size);
