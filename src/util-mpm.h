@@ -315,4 +315,7 @@ MpmAddPid(PatternMatcherQueue *pmq, uint32_t patid)
     pmq->pattern_id_array_cnt = new_size;
     SCLogDebug("pattern_id_array_cnt %u", pmq->pattern_id_array_cnt);
 }
+
+int MpmSortSidsCmp(const void *a, const void *b);
+
 #endif /* __UTIL_MPM_H__ */
