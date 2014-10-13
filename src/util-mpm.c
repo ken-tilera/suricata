@@ -518,11 +518,8 @@ MpmAddPidResize(PatternMatcherQueue *pmq, uint32_t new_size)
 }
 
 void
-MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
+MpmAddSidsMerge(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
 {
-    if (sids_size == 0)
-        return;
-
     uint32_t existing_count = pmq->rule_id_array_cnt;
     uint32_t *existing_sids = pmq->rule_id_array;
     // Check for unchanged parts for existing rules that
