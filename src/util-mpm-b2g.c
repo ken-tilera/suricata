@@ -406,6 +406,10 @@ static int B2gAddPattern(MpmCtx *mpm_ctx, uint8_t *pat, uint16_t patlen, uint16_
             p->sids[p->sids_size] = sid;
             p->sids_size++;
             mpm_ctx->memory_size += sizeof(uint32_t);
+
+            /* Need to keep SIDs listed sorted since it is used in a merge sort later. */
+            /* TODO: Find better place to sort, rather than on every addition. */
+            qsort(p->sids, p->sids_size, sizeof(uint32_t), MpmSortSidsCmp);
         }
     }
 

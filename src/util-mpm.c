@@ -821,6 +821,13 @@ int MpmAddPatternCI(struct MpmCtx_ *mpm_ctx, uint8_t *pat, uint16_t patlen,
 }
 
 
+int MpmSortSidsCmp(const void *a, const void *b)
+{
+    uint32_t x = *(uint32_t *)a;
+    uint32_t y = *(uint32_t *)b;
+    return x - y;
+}
+
 
 /************************************Unittests*********************************/
 

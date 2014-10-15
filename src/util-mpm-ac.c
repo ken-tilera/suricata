@@ -1089,6 +1089,14 @@ int SCACPreparePatterns(MpmCtx *mpm_ctx)
         //SCLogInfo("ctx->parray[i]->sids_size %u", ctx->parray[i]->sids_size);
         ctx->pid_pat_list[ctx->parray[i]->id].sids_size = ctx->parray[i]->sids_size;
         ctx->pid_pat_list[ctx->parray[i]->id].sids = ctx->parray[i]->sids;
+
+        /* Need to Sort the stored SIDs list since it is merge sorted
+         * later. */
+        if (ctx->pid_pat_list[ctx->parray[i]->id].sids_size > 0) {
+            qsort(ctx->pid_pat_list[ctx->parray[i]->id].sids,
+                  ctx->pid_pat_list[ctx->parray[i]->id].sids_size,
+                  sizeof(uint32_t), MpmSortSidsCmp);
+        }
     }
 
     /* prepare the state table required by AC */
