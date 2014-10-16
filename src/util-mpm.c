@@ -524,12 +524,12 @@ MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
         return;
 
     uint32_t existing_count = pmq->rule_id_array_cnt;
-    uint32_t *existing_sids = pmq->rule_id_array;
 
     uint32_t new_size = existing_count + sids_size;
     if (new_size > pmq->rule_id_array_size) {
         MpmAddSidsResize(pmq, new_size);
     }
+    uint32_t *existing_sids = pmq->rule_id_array;
     /* Merge sort remainder of the two lists. */
     uint32_t merged_sids_space[new_size];
     uint32_t *merged_tail = merged_sids_space;
