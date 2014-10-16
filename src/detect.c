@@ -190,6 +190,7 @@
 #include "util-validate.h"
 #include "util-optimize.h"
 #include "util-path.h"
+#include "util-mpm.h"
 #include "util-mpm-ac.h"
 
 #include "runmodes.h"
@@ -813,6 +814,8 @@ static inline void DetectPrefilterMergeSort(DetectEngineCtx *de_ctx,
     uint32_t *nonmpm_ptr = sgh->non_mpm_id_array;
     uint32_t m_cnt = det_ctx->pmq.rule_id_array_cnt;
     uint32_t n_cnt = sgh->non_mpm_id_cnt;
+    BUG_ON(!MpmIsSorted(mpm_ptr,  m_cnt));
+    BUG_ON(!MpmIsSorted(nonmpm_ptr,  n_cnt));
     SCLogDebug("PMQ rule id array count %d", det_ctx->pmq.rule_id_array_cnt);
     SCLogDebug("SGH non-MPM id count %d", sgh->non_mpm_id_cnt);
     /* Load first values. */
@@ -1127,6 +1130,12 @@ static inline void DetectMpmPrefilter(DetectEngineCtx *de_ctx,
             }
         }
     }
+    /*
+    if (det_ctx->pmq.rule_id_array_cnt) {
+        qsort(det_ctx->pmq.rule_id_array, det_ctx->pmq.rule_id_array_cnt,
+              sizeof(uint32_t), DoSort);
+    }
+    */
 }
 
 #ifdef DEBUG

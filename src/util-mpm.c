@@ -536,10 +536,10 @@ MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
     while (1) {
         if (existing_count == 0) {
             /* No more SIDs on original list */
-          /* Then remaining sids list. */
-          while (sids_size--)
-              *merged_tail++ = *sids++;
-          break;
+            /* Then remaining sids list. */
+            while (sids_size--)
+                *merged_tail++ = *sids++;
+            break;
         }
         if (sids_size == 0) {
             /* No more new SIDs. */
@@ -570,8 +570,6 @@ MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
         *existing_sids++ = *merged_head++;
 
     pmq->rule_id_array_cnt = existing_sids - pmq->rule_id_array;
-    return;
-
 }
 
 /** \brief Verify and store a match
@@ -800,6 +798,18 @@ int MpmSortSidsCmp(const void *a, const void *b)
     uint32_t x = *(uint32_t *)a;
     uint32_t y = *(uint32_t *)b;
     return x - y;
+}
+
+/* Return 1 if the list is sorted, otherwise 0 */
+int MpmIsSorted(const uint32_t *sids, uint32_t sids_size)
+{
+    while (sids_size > 1) {
+        if (*sids > *(sids + 1))
+            return 0; /* Not sorted smallest to largest */
+        sids++;
+        sids_size--;
+    }
+    return 1;
 }
 
 

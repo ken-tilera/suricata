@@ -300,5 +300,7 @@ MpmAddPid(PatternMatcherQueue *pmq, uint32_t patid)
 }
 
 int MpmSortSidsCmp(const void *a, const void *b);
+int MpmIsSorted(const uint32_t *sids, uint32_t sids_size);
+
 
 #endif /* __UTIL_MPM_H__ */
