@@ -523,6 +523,8 @@ MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
     if (sids_size == 0)
         return;
 
+    BUG_ON(!MpmIsSorted(sids, sids_size));
+
     uint32_t existing_count = pmq->rule_id_array_cnt;
 
     uint32_t new_size = existing_count + sids_size;
@@ -804,8 +806,10 @@ int MpmSortSidsCmp(const void *a, const void *b)
 int MpmIsSorted(const uint32_t *sids, uint32_t sids_size)
 {
     while (sids_size > 1) {
-        if (*sids > *(sids + 1))
+        if (*sids > *(sids + 1)) {
+            SCLogError(SC_ERR_DETECT_PREPARE, "%u > %u size=%u", *sids, *(sids + 1), sids_size);
             return 0; /* Not sorted smallest to largest */
+        }
         sids++;
         sids_size--;
     }
