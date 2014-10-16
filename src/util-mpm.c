@@ -538,7 +538,7 @@ MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
             /* No more SIDs on original list */
           /* Then remaining sids list. */
           while (sids_size--)
-              *merge_tail++ = *sids++;
+              *merged_tail++ = *sids++;
           break;
         }
         if (sids_size == 0) {
@@ -564,12 +564,12 @@ MpmAddSids(PatternMatcherQueue *pmq, uint32_t *sids, uint32_t sids_size)
     }
     
     /* Then copy merged list back to existing sids. */
-    existing_head = pmq->rule_id_array_cnt;
+    existing_sids = pmq->rule_id_array;
     uint32_t *merged_head = merged_sids_space;
     while (merged_head != merged_tail)
-        *existing_head++ = *merged_head++;
+        *existing_sids++ = *merged_head++;
 
-    pmq->rule_id_array_cnt = existing_head - pmq->rule_id_array;
+    pmq->rule_id_array_cnt = existing_sids - pmq->rule_id_array;
     return;
 
 }
