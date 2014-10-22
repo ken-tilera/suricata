@@ -256,4 +256,22 @@ int MpmAddPatternCI(struct MpmCtx_ *mpm_ctx, uint8_t *pat, uint16_t patlen,
                     uint16_t offset, uint16_t depth,
                     uint32_t pid, uint32_t sid, uint8_t flags);
 
+/* Return 0 if the bit is not set, 1 if it is set. */
+static inline int MpmGetPidBitByMask(PatternMatcherQueue *pmq, uint32_t byte_index, uint8_t mask)
+{
+    return pmq->pattern_id_bitarray[byte_index] & mask;
+}
+
+/* Return 0 if the bit is not set, 1 if it is set. */
+static inline int MpmGetPidBit(PatternMatcherQueue *pmq, uint32_t pid)
+{
+  return MpmGetPidBitByMask(pmq, pid / 8, (1 << (pid % 8)));
+}
+/* Set the PID */
+static inline  void MpmSetPidBit(PatternMatcherQueue *pmq, uint32_t pid)
+{
+    pmq->pattern_id_bitarray[pid / 8] |= (1 << (pid % 8));
+}
+
+
 #endif /* __UTIL_MPM_H__ */

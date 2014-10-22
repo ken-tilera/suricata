@@ -1289,18 +1289,18 @@ uint32_t SCACSearch(MpmCtx *mpm_ctx, MpmThreadCtx *mpm_thread_ctx,
                             /* inside loop */
                             continue;
                         }
-                        if (pmq->pattern_id_bitarray[(pids[k] & 0x0000FFFF) / 8] & (1 << ((pids[k] & 0x0000FFFF) % 8))) {
+                        if (MpmGetPidBit(pmq, pids[k] & 0x0000FFFF)) {
                             ;
                         } else {
-                            pmq->pattern_id_bitarray[(pids[k] & 0x0000FFFF) / 8] |= (1 << ((pids[k] & 0x0000FFFF) % 8));
-                            pmq->pattern_id_array[pmq->pattern_id_array_cnt++] = pids[k] & 0x0000FFFF;
+                              MpmSetPidBit(pmq, pids[k] & 0x0000FFFF);
+                              pmq->pattern_id_array[pmq->pattern_id_array_cnt++] = pids[k] & 0x0000FFFF;
                         }
                         matches++;
                     } else {
-                        if (pmq->pattern_id_bitarray[pids[k] / 8] & (1 << (pids[k] % 8))) {
+                      if (MpmGetPidBit(pmq, pids[k])) {
                             ;
                         } else {
-                            pmq->pattern_id_bitarray[pids[k] / 8] |= (1 << (pids[k] % 8));
+                            MpmSetPidBit(pmq, pids[k]);
                             pmq->pattern_id_array[pmq->pattern_id_array_cnt++] = pids[k];
                         }
                         matches++;
@@ -1328,18 +1328,18 @@ uint32_t SCACSearch(MpmCtx *mpm_ctx, MpmThreadCtx *mpm_thread_ctx,
                             /* inside loop */
                             continue;
                         }
-                        if (pmq->pattern_id_bitarray[(pids[k] & 0x0000FFFF) / 8] & (1 << ((pids[k] & 0x0000FFFF) % 8))) {
+                        if (MpmGetPidBit(pmq, pids[k] & 0x0000FFFF)) {
                             ;
                         } else {
-                            pmq->pattern_id_bitarray[(pids[k] & 0x0000FFFF) / 8] |= (1 << ((pids[k] & 0x0000FFFF) % 8));
+                            MpmSetPidBit(pmq, pids[k] & 0x0000FFFF);
                             pmq->pattern_id_array[pmq->pattern_id_array_cnt++] = pids[k] & 0x0000FFFF;
                         }
                         matches++;
                     } else {
-                        if (pmq->pattern_id_bitarray[pids[k] / 8] & (1 << (pids[k] % 8))) {
+                        if (MpmGetPidBit(pmq, pids[k])) {
                             ;
                         } else {
-                            pmq->pattern_id_bitarray[pids[k] / 8] |= (1 << (pids[k] % 8));
+                            MpmSetPidBit(pmq, pids[k]);
                             pmq->pattern_id_array[pmq->pattern_id_array_cnt++] = pids[k];
                         }
                         matches++;
@@ -2012,17 +2012,17 @@ uint32_t SCACCudaPacketResultsProcessing(Packet *p, MpmCtx *mpm_ctx,
                     /* inside loop */
                     continue;
                 }
-                if (pmq->pattern_id_bitarray[(pids[k] & 0x0000FFFF) / 8] & (1 << ((pids[k] & 0x0000FFFF) % 8))) {
+                if (MpmGetPidBit(pmq, pids[k] & 0x0000FFFF)) {
                     ;
                 } else {
-                    pmq->pattern_id_bitarray[(pids[k] & 0x0000FFFF) / 8] |= (1 << ((pids[k] & 0x0000FFFF) % 8));
+                    MpmSetPidBit(pmq, pids[k] & 0x0000FFFF);
                 }
                 matches++;
             } else {
-                if (pmq->pattern_id_bitarray[pids[k] / 8] & (1 << (pids[k] % 8))) {
+                if (MpmGetPidBit(pmq, pids[k])) {
                     ;
                 } else {
-                    pmq->pattern_id_bitarray[pids[k] / 8] |= (1 << (pids[k] % 8));
+                    MpmSetPidBit(pmq, pids[k]);
                 }
                 matches++;
             }

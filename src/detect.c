@@ -528,7 +528,7 @@ int SigMatchSignaturesBuildMatchArrayAddSignature(DetectEngineThreadCtx *det_ctx
     {
         /* filter out sigs that want pattern matches, but
          * have no matches */
-        if (!(det_ctx->pmq.pattern_id_bitarray[(s->mpm_pattern_id_div_8)] & s->mpm_pattern_id_mod_8)) {
+        if (!(MpmGetPidBitBySignatureHeader(&det_ctx->pmq, s))) {
             if (s->flags & SIG_FLAG_MPM_PACKET) {
                 if (!(s->flags & SIG_FLAG_MPM_PACKET_NEG)) {
                     return 0;
@@ -1431,7 +1431,7 @@ int SigMatchSignatures(ThreadVars *th_v, DetectEngineCtx *de_ctx, DetectEngineTh
                         /* filter out sigs that want pattern matches, but
                          * have no matches */
                         if ((s->flags & SIG_FLAG_MPM_STREAM) && !(s->flags & SIG_FLAG_MPM_STREAM_NEG) &&
-                            !(det_ctx->smsg_pmq[pmq_idx].pattern_id_bitarray[(s->mpm_pattern_id_div_8)] & s->mpm_pattern_id_mod_8)) {
+                            !MpmGetPidBitBySignature(&det_ctx->smsg_pmq[pmq_idx], s)) {
                             SCLogDebug("no match in this smsg");
                             continue;
                         }
@@ -1463,8 +1463,7 @@ int SigMatchSignatures(ThreadVars *th_v, DetectEngineCtx *de_ctx, DetectEngineTh
 
                     if (sms_runflags & SMS_USED_PM) {
                         if ((s->flags & SIG_FLAG_MPM_PACKET) && !(s->flags & SIG_FLAG_MPM_PACKET_NEG) &&
-                            !(det_ctx->pmq.pattern_id_bitarray[(s->mpm_pattern_id_div_8)] &
-                              s->mpm_pattern_id_mod_8)) {
+                            !MpmGetPidBitBySignature(&det_ctx->pmq, s)) {
                             goto next;
                         }
                         if (DetectEngineInspectPacketPayload(de_ctx, det_ctx, s, pflow, p) != 1) {
@@ -1479,8 +1478,7 @@ int SigMatchSignatures(ThreadVars *th_v, DetectEngineCtx *de_ctx, DetectEngineTh
             } else {
                 if (sms_runflags & SMS_USED_PM) {
                     if ((s->flags & SIG_FLAG_MPM_PACKET) && !(s->flags & SIG_FLAG_MPM_PACKET_NEG) &&
-                        !(det_ctx->pmq.pattern_id_bitarray[(s->mpm_pattern_id_div_8)] &
-                          s->mpm_pattern_id_mod_8)) {
+                        !MpmGetPidBitBySignature(&det_ctx->pmq, s)) {
                         goto next;
                     }
                     if (DetectEngineInspectPacketPayload(de_ctx, det_ctx, s, pflow, p) != 1) {
