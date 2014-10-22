@@ -479,9 +479,9 @@ MpmVerifyMatch(MpmThreadCtx *thread_ctx, PatternMatcherQueue *pmq, uint32_t pati
     if (pmq != NULL && pmq->pattern_id_bitarray != NULL) {
         SCLogDebug("using pattern id arrays, storing %"PRIu32, patid);
 
-        if (!(pmq->pattern_id_bitarray[(patid / 8)] & (1<<(patid % 8)))) {
+        if (!(MpmGetPidBit(pmq, patid))) {
             /* flag this pattern id as being added now */
-            pmq->pattern_id_bitarray[(patid / 8)] |= (1<<(patid % 8));
+            MpmSetPidBit(pmq, patid);
             /* append the pattern_id to the array with matches */
             pmq->pattern_id_array[pmq->pattern_id_array_cnt] = patid;
             pmq->pattern_id_array_cnt++;

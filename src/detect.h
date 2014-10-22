@@ -1198,5 +1198,17 @@ int SigMatchSignaturesRunPostMatch(ThreadVars *tv,
                                    DetectEngineCtx *de_ctx, DetectEngineThreadCtx *det_ctx, Packet *p,
                                    Signature *s);
 
+/* Return 0 if the bit is not set, 1 if it is set. */
+static inline int MpmGetPidBitBySignature(PatternMatcherQueue *pmq, Signature *s)
+{
+    return MpmGetPidBitByMask(pmq, s->mpm_pattern_id_div_8, s->mpm_pattern_id_mod_8);
+}
+
+/* Return 0 if the bit is not set, 1 if it is set. */
+static inline int MpmGetPidBitBySignatureHeader(PatternMatcherQueue *pmq, SignatureHeader *s)
+{
+    return MpmGetPidBitByMask(pmq, s->mpm_pattern_id_div_8, s->mpm_pattern_id_mod_8);
+}
+
 #endif /* __DETECT_H__ */
 

@@ -1412,7 +1412,6 @@ int CheckMatch(SCACTileSearchCtx *ctx, PatternMatcherQueue *pmq,
     uint8_t *buf_offset = buf + i + 1; // Lift out of loop
     uint32_t no_of_entries = ctx->output_table[state].no_of_entries;
     uint32_t *pids = ctx->output_table[state].pids;
-    uint8_t *bitarray = pmq->pattern_id_bitarray;
     uint32_t k;
 
     /* Where to start storing new patterns */
@@ -1428,10 +1427,10 @@ int CheckMatch(SCACTileSearchCtx *ctx, PatternMatcherQueue *pmq,
                 continue;
             }
         }
-        if (bitarray[(lower_pid) / 8] & (1 << ((lower_pid) % 8))) {
+        if (MpmGetPidBit(pmq, lower_pid)) {
             ;
         } else {
-            bitarray[(lower_pid) / 8] |= (1 << ((lower_pid) % 8));
+            MpmSetPidBit(pmq, lower_pid);
             *new_pattern++ = lower_pid;
         }
         matches++;
@@ -1496,21 +1495,19 @@ uint32_t SCACTileSearchLarge(SCACTileSearchCtx *ctx, MpmThreadCtx *mpm_thread_ct
                         /* inside loop */
                         continue;
                     }
-                    if (pmq->pattern_id_bitarray[(pids[k] & 0x0000FFFF) / 8] &
-                        (1 << ((pids[k] & 0x0000FFFF) % 8))) {
+                    if (MpmGetPidBit(pmq,pids[k] & 0x0000FFFF)) {
                         ;
                     } else {
-                        pmq->pattern_id_bitarray[(pids[k] & 0x0000FFFF) / 8] |=
-                          (1 << ((pids[k] & 0x0000FFFF) % 8));
+                        MpmSetPidBit(pmq, pids[k] & 0x0000FFFF);
                         pmq->pattern_id_array[pmq->pattern_id_array_cnt++] =
                           pids[k] & 0x0000FFFF;
                     }
                     matches++;
                 } else {
-                    if (pmq->pattern_id_bitarray[pids[k] / 8] & (1 << (pids[k] % 8))) {
+                    if (MpmGetPidBit(pmq, pids[k])) {
                         ;
                     } else {
-                        pmq->pattern_id_bitarray[pids[k] / 8] |= (1 << (pids[k] % 8));
+                        MpmSetPidBit(pmq, pids[k]);
                         pmq->pattern_id_array[pmq->pattern_id_array_cnt++] = pids[k];
                     }
                     matches++;
