@@ -51,6 +51,8 @@
 #include "detect-engine-mpm.h"
 #endif
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
 /**
  * \brief Register a new Mpm Context.
  *
@@ -441,14 +443,15 @@ int PmqSetup(PatternMatcherQueue *pmq, uint32_t patmaxid)
         memset(pmq->pattern_id_array, 0, pmq->pattern_id_array_size);
         pmq->pattern_id_array_cnt = 0;
 
-        /* lookup bitarray */
-        pmq->pattern_id_bitarray_size = (patmaxid / 8) + 1;
+        /* Create bitarray for Pattern Ids. Round up to full cacheline. */
+        pmq->pattern_id_bitarray_size = ((patmaxid + CLS * 8 - 1) & ~(CLS * 8 - 1)) / 8;
 
-        pmq->pattern_id_bitarray = SCMalloc(pmq->pattern_id_bitarray_size);
+        pmq->pattern_id_bitarray = SCMallocAligned(pmq->pattern_id_bitarray_size, CLS);
         if (pmq->pattern_id_bitarray == NULL) {
             SCReturnInt(-1);
         }
-        memset(pmq->pattern_id_bitarray, 0, pmq->pattern_id_bitarray_size);
+        /* Mark all the bits as being zero. */
+        pmq->pattern_id_bitarray_top = 0;        
 
         SCLogDebug("pmq->pattern_id_array %p, pmq->pattern_id_bitarray %p",
                 pmq->pattern_id_array, pmq->pattern_id_bitarray);
@@ -500,13 +503,32 @@ MpmVerifyMatch(MpmThreadCtx *thread_ctx, PatternMatcherQueue *pmq, uint32_t pati
  */
 void PmqMerge(PatternMatcherQueue *src, PatternMatcherQueue *dst)
 {
-    uint32_t u;
-
     if (src->pattern_id_array_cnt == 0)
         return;
 
-    for (u = 0; u < src->pattern_id_bitarray_size && u < dst->pattern_id_bitarray_size; u++) {
-        dst->pattern_id_bitarray[u] |= src->pattern_id_bitarray[u];
+    uint64_t src_top = src->pattern_id_bitarray_top;
+    uint64_t dst_top = dst->pattern_id_bitarray_top;
+
+    if (src_top == 0)
+      return;
+
+    //BUG_ON(src->pattern_id_bitarray_size & (CLS - 1) != 0);
+    //BUG_ON(dst->pattern_id_bitarray_size & (CLS - 1) != 0);
+    int cl_count = MIN(src->pattern_id_bitarray_size, dst->pattern_id_bitarray_size) / CLS;
+    for (int cl = 0; cl < cl_count; cl++) {
+        if ((src_top & (1 << cl)) == 0)
+            continue; /* Nothing in this Cacheline of the src */
+        uint64_t *dstw = (uint64_t*)(dst->pattern_id_bitarray + cl * CLS);
+        uint64_t *srcw = (uint64_t*)(src->pattern_id_bitarray + cl * CLS);
+        if ((dst_top & (1 << cl)) == 0) {
+            /* Nothing in the destination cacheline yet, So clear it. TODO, could just copy from source */
+            memset(dstw, 0, CLS);
+            dst->pattern_id_bitarray_top |= (1 << cl);
+        }
+        /* Do 64-bit ORs instead of bytes. */
+        for (uint32_t w = 0; w < (CLS / sizeof(uint64_t)); w++) {
+            *dstw++ |= *srcw++;
+        }
     }
 
     /** \todo now set merged flag? */
@@ -522,8 +544,7 @@ void PmqReset(PatternMatcherQueue *pmq)
     if (pmq == NULL)
         return;
 
-    memset(pmq->pattern_id_bitarray, 0, pmq->pattern_id_bitarray_size);
-    //memset(pmq->pattern_id_array, 0, pmq->pattern_id_array_size);
+    pmq->pattern_id_bitarray_top = 0; /* All bits assumed cleared. */
     pmq->pattern_id_array_cnt = 0;
 /*
     uint32_t u;

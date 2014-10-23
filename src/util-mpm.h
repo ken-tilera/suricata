@@ -104,6 +104,11 @@ typedef struct PatternMatcherQueue_ {
     uint32_t pattern_id_array_cnt;
     uint32_t pattern_id_array_size; /**< size in bytes */
 
+    /* Bit mask for 512 bit groups pattern_id_bitarray bits (64 Bytes)
+     * 0 - all 512 bits are considered 0.
+     * 1 - At least one of the 512 bits is 1.
+     */
+    uint64_t pattern_id_bitarray_top;
     uint8_t *pattern_id_bitarray;   /** bitarray with pattern id matches */
     uint32_t pattern_id_bitarray_size; /**< size in bytes */
 } PatternMatcherQueue;
@@ -257,20 +262,34 @@ int MpmAddPatternCI(struct MpmCtx_ *mpm_ctx, uint8_t *pat, uint16_t patlen,
                     uint32_t pid, uint32_t sid, uint8_t flags);
 
 /* Return 0 if the bit is not set, 1 if it is set. */
-static inline int MpmGetPidBitByMask(PatternMatcherQueue *pmq, uint32_t byte_index, uint8_t mask)
+static inline int MpmGetPidBitByMask(PatternMatcherQueue *pmq,
+                                     uint32_t byte_index, uint8_t mask)
 {
-    return pmq->pattern_id_bitarray[byte_index] & mask;
+    int cacheline_group = byte_index / CLS;
+    if (pmq->pattern_id_bitarray_top & (1 << cacheline_group))
+        return pmq->pattern_id_bitarray[byte_index] & mask;
+    else
+        return 0;
 }
 
 /* Return 0 if the bit is not set, 1 if it is set. */
 static inline int MpmGetPidBit(PatternMatcherQueue *pmq, uint32_t pid)
 {
-  return MpmGetPidBitByMask(pmq, pid / 8, (1 << (pid % 8)));
+    return MpmGetPidBitByMask(pmq, pid / 8, (1 << (pid % 8)));
 }
-/* Set the PID */
-static inline  void MpmSetPidBit(PatternMatcherQueue *pmq, uint32_t pid)
+/* Set the PID if it was not already set, return its previous value */
+static inline void MpmSetPidBit(PatternMatcherQueue *pmq, uint32_t pid)
 {
-    pmq->pattern_id_bitarray[pid / 8] |= (1 << (pid % 8));
+    int byte_index = pid / 8;
+    int cacheline_group = byte_index / CLS;
+    if (pmq->pattern_id_bitarray_top & (1 << cacheline_group)) {
+        /* Another bit is also already set in the same group. */
+    } else {
+        /* First set to this cacheline, so clear it now. */
+        memset(&pmq->pattern_id_bitarray[cacheline_group * CLS], 0, CLS);
+        pmq->pattern_id_bitarray_top |= (1 << cacheline_group);
+    }
+    pmq->pattern_id_bitarray[byte_index] |= (1 << (pid % 8));
 }
 
 
