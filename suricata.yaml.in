@@ -908,6 +908,9 @@ mpipe:
   # Load balancing modes: "static", "dynamic", "sticky", or "round-robin".
   load-balance: dynamic
 
+  # bpf filter for this interface
+  #bpf-filter: tcp
+
   # Number of Packets in each ingress packet queue. Must be 128, 512, 2028 or 65536
   iqueue-packets: 2048
 

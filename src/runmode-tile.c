@@ -134,6 +134,7 @@ void *ParseMpipeConfig(const char *iface)
             exit(EXIT_FAILURE);
         }
     }
+
     return aconf;
 }
 

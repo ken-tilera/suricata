@@ -107,6 +107,8 @@ typedef struct MpipeThreadVars_
 
     Packet *in_p;
 
+    struct bpf_program bpf_prog;
+
     /** stats/counters */
     uint16_t max_mpipe_depth;
     uint16_t mpipe_drop;
@@ -389,6 +391,25 @@ TmEcode ReceiveMpipeLoop(ThreadVars *tv, void *data, void *slot)
             }
             for (i = 0; i < m; i++, idesc++) {
                 if (likely(!gxio_mpipe_idesc_has_error(idesc))) {
+
+                    /* Check Patch filter */
+                    if (ptv->bpf_prog.bf_len) {
+                        int caplen = idesc->l2_size;
+                        u_char *pkt = gxio_mpipe_idesc_get_va(idesc);
+
+                        struct pcap_pkthdr pkthdr = { {0, 0}, caplen, caplen };
+                        if (pcap_offline_filter(&ptv->bpf_prog,
+                                                &pkthdr, pkt) == 0) {
+                            /* rejected by bpf */
+                            gxio_mpipe_push_buffer(iqueue->context,
+                                                   idesc->stack_idx,
+                                                   pkt);
+                            gxio_mpipe_iqueue_release(iqueue, idesc);
+
+                            continue;
+                        }
+                    }
+
                     p = MpipeProcessPacket(ptv, idesc);
                     p->mpipe_v.rank = rank;
                     if (TmThreadsSlotProcessPkt(ptv->tv, ptv->slot, p) != TM_ECODE_OK) {
@@ -435,7 +456,7 @@ TmEcode ReceiveMpipeLoop(ThreadVars *tv, void *data, void *slot)
     SCReturnInt(TM_ECODE_OK);
 }
 
-static void MpipeRegisterPerfCounters(MpipeThreadVars *ptv, ThreadVars *tv)
+void MpipeRegisterPerfCounters(MpipeThreadVars *ptv, ThreadVars *tv)
 {
     /* register counters */
     ptv->max_mpipe_depth = SCPerfTVRegisterCounter("mpipe.max_mpipe_depth",
@@ -898,6 +919,47 @@ static int MpipeReceiveOpenEgress(char *out_iface, int iface_idx,
     return -1;
 }
 
+static TmEcode ReceiveMpipeBpfFilterInit(MpipeThreadVars *ptv)
+{
+    char *bpf_filter = NULL;
+
+    /* Find initial node */
+    ConfNode *mpipe_node = ConfGetNode("mpipe");
+    if (mpipe_node == NULL) {
+        SCLogInfo("Unable to find mpipe config using default value");
+        return TM_ECODE_FAILED;
+    }
+
+    /* load mpipe bpf filter */
+    /* command line value has precedence */
+    if (ConfGet("bpf-filter", &bpf_filter) == 1) {
+        if (strlen(bpf_filter) > 0) {
+            SCLogInfo("Going to use command-line provided bpf filter '%s'",
+                      bpf_filter);
+        }
+    } else {
+        if (ConfGetChildValue(mpipe_node, "bpf-filter", &bpf_filter) == 1) {
+            if (strlen(bpf_filter) > 0) {
+                SCLogInfo("Going to use bpf filter %s", bpf_filter);
+            }
+        }
+    }
+
+    if (bpf_filter) {
+        if (pcap_compile_nopcap(default_packet_size,  /* snaplen_arg */
+                                LINKTYPE_ETHERNET,    /* linktype_arg */
+                                &ptv->bpf_prog,       /* program */
+                                bpf_filter,    /* const char *buf */
+                                1,                    /* optimize */
+                                PCAP_NETMASK_UNKNOWN  /* mask */
+                                ) == -1) {
+            SCLogError(SC_ERR_BPF, "Filter compilation failed.");
+            return TM_ECODE_FAILED;
+        }
+    }
+    return TM_ECODE_OK;
+}
+
 TmEcode ReceiveMpipeThreadInit(ThreadVars *tv, void *initdata, void **data)
 {
     SCEnter();
@@ -924,6 +986,10 @@ TmEcode ReceiveMpipeThreadInit(ThreadVars *tv, void *initdata, void **data)
     MpipeRegisterPerfCounters(ptv, tv);
 
     *data = (void *)ptv;
+
+    result = ReceiveMpipeBpfFilterInit(ptv);
+    if (result != TM_ECODE_OK)
+        SCReturnInt(result);
 
     /* Only rank 0 does initialization of mpipe */
     if (rank != 0)
@@ -1046,6 +1112,12 @@ TmEcode DecodeMpipeThreadInit(ThreadVars *tv, void *initdata, void **data)
 
 TmEcode DecodeMpipeThreadDeinit(ThreadVars *tv, void *data)
 {
+    MpipeThreadVars *ptv = (MpipeThreadVars *)data;
+
+    if (ptv->bpf_prog.bf_insns) {
+        pcap_freecode(&ptv->bpf_prog);
+    }
+
     if (data != NULL)
         DecodeThreadVarsFree(tv, data);
     SCReturnInt(TM_ECODE_OK);
